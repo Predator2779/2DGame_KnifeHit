@@ -1,65 +1,92 @@
 using UnityEngine;
 using UnityEngine.UI;
-using UnityEngine.Android;
 using System.Collections;
 
-public class ThrowScript : MonoBehaviour
+public class ThrowScript : ManagerScript
 {
-    [SerializeField] private GameObject _knife;
-    [SerializeField] private Text _timer;
+    public GameObject _cloneKnife;
 
-    private GameObject _cloneKnife;
-    private float _time = 0;
-    private bool _fire = true;
+    /// <summary>
+    /// Start.
+    /// </summary>
+    private void Start() => SpawnKnife();
 
-    private void Start() => _cloneKnife = Instantiate(_knife, transform.position, transform.rotation);
-
+    /// <summary>
+    /// Update.
+    /// </summary>
     private void Update()
     {
-        if (/*Input.touchCount == 1 || */Input.GetKey(KeyCode.Space) && _fire)
-            Timer();
+        Timer();
+
+        if (Input.GetKey(KeyCode.Space) && _fire)
+            ThrowTimer();
         if (Input.GetKeyUp(KeyCode.Space))
-            Throw();
+            SelectThrow();
     }
 
-    private void ThrowKnife() 
+    /// <summary>
+    /// Метание ножа.
+    /// </summary>
+    private void ThrowKnife()
     {
         _fire = false;
-        _cloneKnife.GetComponent<Rigidbody2D>().AddForce(Vector2.down * 50.0f, ForceMode2D.Impulse);
+        float force = 50.0f;
         _cloneKnife.AddComponent<KnifeBehaviour>();
-        StartCoroutine(SpawnKnife());
+
+        if (_isTwisted)
+        {
+            force = 15.0f;
+            _cloneKnife.GetComponent<KnifeBehaviour>()._rotate = true;
+        }
+        _cloneKnife.GetComponent<Rigidbody2D>().AddForce(Vector2.down * force, ForceMode2D.Impulse);
+
+        _holdTime = 0.15f;
+        _holdThrow = true;
     }
 
-    private void TwistedThrowKnife()
+    /// <summary>
+    /// Время нажатия клавиши метания.
+    /// </summary>
+    public void ThrowTimer() => _holdTime += Time.deltaTime;
+
+    /// <summary>
+    /// Выбор стиля метания.
+    /// </summary>
+    public void SelectThrow()
     {
-        _fire = false;
-        transform.Rotate(0, 0, Time.deltaTime * 1500.0f);
-        _cloneKnife.GetComponent<Rigidbody2D>().AddForce(Vector2.zero * 1.0f, ForceMode2D.Impulse);        /////
-        _cloneKnife.AddComponent<KnifeBehaviour>();
-        StartCoroutine(SpawnKnife());
+        if (_holdTime > 0.15f) _isTwisted = true;
+
+        ThrowKnife();
     }
 
-    public void Timer()
+    /// <summary>
+    /// Спаун ножей.
+    /// </summary>
+    private void SpawnKnife()
     {
-        _timer.text = _time.ToString();
-        _time += Time.deltaTime;
-    }
-
-    public void Throw()
-    {
-        if (_time < 0.8f)
-            ThrowKnife();
-        else
-            TwistedThrowKnife();
-    }
-
-    IEnumerator SpawnKnife()
-    {
-        yield return new WaitForSeconds(0.07f);
         _cloneKnife = Instantiate(_knife, transform.position, transform.rotation);
         _cloneKnife.transform.rotation = Quaternion.identity;
-            //new Quaternion(transform.rotation.x, transform.rotation.y, 0, transform.rotation.w);
-        _time = 0;
+        _cloneKnife.transform.SetParent(this.transform);
+        _cloneKnife.transform.Find("KnifeSprite").GetComponent<SpriteRenderer>().sprite = _knifeSkin;
+        _holdTime = 0;
         _fire = true;
+    }
+
+    /// <summary>
+    /// Таймер спавна норжей.
+    /// </summary>
+    private void Timer()
+    {
+        if (_holdThrow)
+        {
+            _holdTime -= Time.deltaTime;
+
+            if (_holdTime <= 0)
+            {
+                SpawnKnife();
+
+                _holdThrow = false;
+            }
+        }
     }
 }

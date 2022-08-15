@@ -1,0 +1,22 @@
+fileFormatVersion: 2
+guid: c8bf1fd4d81672540afba4fc26853769
+TrueTypeFontImporter:
+  externalObjects: {}
+  serializedVersion: 4
+  fontSize: 16
+  forceTextureCase: -2
+  characterSpacing: 0
+  characterPadding: 1
+  includeFontData: 1
+  fontNames:
+  - Showcard Gothic
+  fallbackFontReferences:
+  - {fileID: 12800000, guid: 5ac386678252d43458a24d93a9a4e044, type: 3}
+  customCharacters: 
+  fontRenderingMode: 0
+  ascentCalculationMode: 1
+  useLegacyBoundsCalculation: 0
+  shouldRoundAdvanceValue: 1
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
